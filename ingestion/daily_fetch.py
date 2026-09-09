@@ -1,4 +1,3 @@
-# ingestion/daily_fetch.py
 import time
 from datetime import date, timedelta
 from pathlib import Path
