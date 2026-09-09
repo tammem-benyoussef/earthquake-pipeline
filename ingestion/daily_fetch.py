@@ -7,7 +7,7 @@ import click
 import requests
 
 BASE_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query"
-RAW_DIR = Path("data/raw")
+RAW_DIR = Path(__file__).resolve().parent.parent / "data" / "raw" / "earthquakes"
 
 
 def fetch_earthquakes(start_date: date, end_date: date) -> str:
