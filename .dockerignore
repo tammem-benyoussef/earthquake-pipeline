@@ -1,0 +1,9 @@
+.venv
+data/
+.git
+.github
+.pytest_cache
+tests/
+__pycache__
+*.pyc
+.python-version.orig
