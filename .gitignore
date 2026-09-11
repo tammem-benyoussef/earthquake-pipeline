@@ -218,3 +218,9 @@ __marimo__/
 .streamlit/secrets.toml
 data/raw/
 .env
+
+#terraform
+terraform/.terraform/
+terraform/terraform.tfvars
+terraform/*.tfstate
+terraform/*.tfstate.*
