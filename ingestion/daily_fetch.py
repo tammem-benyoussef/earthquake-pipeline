@@ -1,12 +1,24 @@
+import os
 import time
 from datetime import date, timedelta
-from pathlib import Path
 
+import boto3
 import click
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 BASE_URL = "https://earthquake.usgs.gov/fdsnws/event/1/query"
-RAW_DIR = Path(__file__).resolve().parent.parent / "data" / "raw" / "earthquakes"
+BUCKET = "raw"
+S3_PREFIX = "earthquakes"
+
+s3 = boto3.client(
+    "s3",
+    endpoint_url="http://localhost:9000",
+    aws_access_key_id=os.environ["MINIO_ROOT_USER"],
+    aws_secret_access_key=os.environ["MINIO_ROOT_PASSWORD"],
+)
 
 
 def fetch_earthquakes(start_date: date, end_date: date) -> str:
@@ -21,18 +33,23 @@ def fetch_earthquakes(start_date: date, end_date: date) -> str:
     return response.text
 
 
-def get_partition_path(day: date) -> Path:
+def get_object_key(day: date) -> str:
     return (
-        RAW_DIR
-        / f"year={day.year:04d}"
-        / f"month={day.month:02d}"
-        / f"day={day.day:02d}.csv"
+        f"{S3_PREFIX}/year={day.year:04d}/month={day.month:02d}/day={day.day:02d}.csv"
     )
 
 
+def object_exists(key: str) -> bool:
+    try:
+        s3.head_object(Bucket=BUCKET, Key=key)
+        return True
+    except s3.exceptions.ClientError:
+        return False
+
+
 def save_day(day: date) -> str:
-    path = get_partition_path(day)
-    if path.exists():
+    key = get_object_key(day)
+    if object_exists(key):
         click.echo(f"skip {day} (already exists)")
         return "skipped"
 
@@ -44,18 +61,18 @@ def save_day(day: date) -> str:
 
     is_empty = csv_text.count("\n") <= 1
 
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(csv_text, encoding="utf-8")
-    click.echo(f"saved {day} -> {path}")
+    s3.put_object(Bucket=BUCKET, Key=key, Body=csv_text.encode("utf-8"))
+    click.echo(f"saved {day} -> s3://{BUCKET}/{key}")
     return "empty" if is_empty else "saved"
 
 
 @click.command()
-@click.option("--start-date", required=True, type=click.DateTime(formats=["%Y-%m-%d"]))
-@click.option("--end-date", required=True, type=click.DateTime(formats=["%Y-%m-%d"]))
+@click.option("--start-date", type=click.DateTime(formats=["%Y-%m-%d"]), default=None)
+@click.option("--end-date", type=click.DateTime(formats=["%Y-%m-%d"]), default=None)
 def main(start_date, end_date):
-    day = start_date.date()
-    end = end_date.date()
+    yesterday = date.today() - timedelta(days=1)
+    day = start_date.date() if start_date else yesterday
+    end = end_date.date() if end_date else yesterday
     empty_days = []
 
     while day <= end:

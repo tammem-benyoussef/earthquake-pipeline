@@ -1,5 +1,6 @@
+# tests/test_daily_fetch.py
 from datetime import date
-from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 import requests
@@ -7,54 +8,63 @@ import requests
 from ingestion import daily_fetch
 
 
-def test_get_partition_path():
-    path = daily_fetch.get_partition_path(date(2026, 1, 3))
-    assert path == daily_fetch.RAW_DIR / "year=2026" / "month=01" / "day=03.csv"
+def test_get_object_key():
+    key = daily_fetch.get_object_key(date(2026, 1, 3))
+    assert key == "earthquakes/year=2026/month=01/day=03.csv"
 
 
-def test_save_day_skips_existing(tmp_path, monkeypatch):
-    monkeypatch.setattr(daily_fetch, "RAW_DIR", tmp_path)
-    day = date(2026, 1, 3)
-    existing = daily_fetch.get_partition_path(day)
-    existing.parent.mkdir(parents=True)
-    existing.write_text("already here")
+def test_save_day_skips_existing(monkeypatch):
+    monkeypatch.setattr(daily_fetch, "object_exists", lambda key: True)
 
     def fail_if_called(*a, **kw):
         raise AssertionError("fetch_earthquakes should not be called")
 
     monkeypatch.setattr(daily_fetch, "fetch_earthquakes", fail_if_called)
-    status = daily_fetch.save_day(day)
+    status = daily_fetch.save_day(date(2026, 1, 3))
     assert status == "skipped"
 
 
-def test_save_day_saves_new_file(tmp_path, monkeypatch):
-    monkeypatch.setattr(daily_fetch, "RAW_DIR", tmp_path)
+def test_save_day_saves_new_file(monkeypatch):
+    monkeypatch.setattr(daily_fetch, "object_exists", lambda key: False)
     monkeypatch.setattr(
         daily_fetch, "fetch_earthquakes",
         lambda start, end: "id,mag\nusgs1,4.5\nusgs2,3.1\n"
     )
+    mock_put = MagicMock()
+    monkeypatch.setattr(daily_fetch.s3, "put_object", mock_put)
+
     status = daily_fetch.save_day(date(2026, 1, 3))
+
     assert status == "saved"
-    assert daily_fetch.get_partition_path(date(2026, 1, 3)).exists()
+    mock_put.assert_called_once()
+    call_kwargs = mock_put.call_args.kwargs
+    assert call_kwargs["Bucket"] == "raw"
+    assert call_kwargs["Key"] == "earthquakes/year=2026/month=01/day=03.csv"
 
 
-def test_save_day_detects_empty(tmp_path, monkeypatch):
-    monkeypatch.setattr(daily_fetch, "RAW_DIR", tmp_path)
+def test_save_day_detects_empty(monkeypatch):
+    monkeypatch.setattr(daily_fetch, "object_exists", lambda key: False)
     monkeypatch.setattr(daily_fetch, "fetch_earthquakes", lambda s, e: "id,mag\n")
+    monkeypatch.setattr(daily_fetch.s3, "put_object", MagicMock())
+
     status = daily_fetch.save_day(date(2026, 1, 3))
     assert status == "empty"
 
 
-def test_save_day_handles_fetch_error(tmp_path, monkeypatch):
-    monkeypatch.setattr(daily_fetch, "RAW_DIR", tmp_path)
+def test_save_day_handles_fetch_error(monkeypatch):
+    monkeypatch.setattr(daily_fetch, "object_exists", lambda key: False)
 
     def raise_error(start, end):
         raise requests.RequestException("boom")
 
     monkeypatch.setattr(daily_fetch, "fetch_earthquakes", raise_error)
+    mock_put = MagicMock()
+    monkeypatch.setattr(daily_fetch.s3, "put_object", mock_put)
+
     status = daily_fetch.save_day(date(2026, 1, 3))
+
     assert status == "error"
-    assert not daily_fetch.get_partition_path(date(2026, 1, 3)).exists()
+    mock_put.assert_not_called()
 
 
 def test_fetch_earthquakes_sends_correct_params(monkeypatch):
