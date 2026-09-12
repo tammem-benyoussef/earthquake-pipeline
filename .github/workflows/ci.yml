@@ -12,3 +12,6 @@ jobs:
       - uses: astral-sh/setup-uv@v3
       - run: uv sync
       - run: uv run pytest
+        env:
+          MINIO_ROOT_USER: dummy
+          MINIO_ROOT_PASSWORD: dummy
