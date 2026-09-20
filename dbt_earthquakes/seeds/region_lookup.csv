@@ -1,0 +1,16 @@
+region_id,region_name,min_lat,max_lat,min_long,max_long
+1,Pacific Northwest / Cascadia,40.0,52.0,-130.0,-116.0
+2,California,32.0,42.0,-125.0,-114.0
+3,Alaska,51.0,72.0,-170.0,-129.0
+4,Mexico / Central America,7.0,33.0,-118.0,-77.0
+5,Andes (South America),-56.0,12.0,-82.0,-60.0
+6,Caribbean,10.0,24.0,-88.0,-59.0
+7,Japan,24.0,46.0,122.0,146.0
+8,Indonesia / Philippines,-11.0,20.0,95.0,141.0
+9,New Zealand / Tonga,-48.0,-14.0,165.0,-173.0
+10,China / Central Asia,18.0,55.0,73.0,135.0
+11,Middle East / Iran,12.0,42.0,26.0,63.0
+12,Mediterranean / Southern Europe,30.0,47.0,-10.0,42.0
+13,Mid-Atlantic Ridge,-60.0,70.0,-40.0,-10.0
+14,East Africa Rift,-35.0,15.0,28.0,52.0
+15,Other / Unclassified,-90.0,90.0,-180.0,180.0

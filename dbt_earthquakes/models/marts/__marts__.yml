@@ -1,0 +1,59 @@
+version: 2
+
+models:
+  - name: dim_date
+    description: "Calendar date dimension generated via dbt_utils.date_spine, independent of actual earthquake occurrence."
+    columns:
+      - name: date_day
+        tests:
+          - unique
+          - not_null
+
+  - name: fct_earthquakes
+    description: "One row per earthquake event. Incremental, merged on id, filtered on time for new-row detection only (Spark already guarantees dedup upstream)."
+    columns:
+      - name: id
+        tests:
+          - unique
+          - not_null
+      - name: event_date
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                  to: ref('dim_date')
+                  field: date_day
+      - name: region_name
+        tests:
+          - not_null
+          - relationships:
+              arguments:
+                  to: ref('region_lookup')
+                  field: region_name
+      - name: latitude
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -90
+                max_value: 90
+      - name: longitude
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -180
+                max_value: 180
+
+  - name: mart_daily_summary
+    description: "Pre-aggregated earthquake counts/magnitude/energy stats by date and region, for Power BI dashboard consumption without re-scanning raw events."
+    columns:
+      - name: event_date
+        tests:
+          - not_null
+
+  - name: mart_regional_summary
+    description: "Earthquake counts and magnitude/energy stats aggregated by region across the full history — for a ranked regional comparison view, distinct from mart_daily_summary's date x region grain."
+    columns:
+      - name: region_name
+        tests:
+          - unique
+          - not_null

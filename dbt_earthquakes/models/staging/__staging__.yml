@@ -1,0 +1,57 @@
+version: 2
+
+sources:
+  - name: staging
+    schema: staging
+    description: "Raw upserted earthquake records, written by Spark after clean/dedupe/enrich."
+    tables:
+      - name: earthquakes
+        description: "One row per earthquake event, upserted on id by Spark's write_to_postgres step."
+        columns:
+          - name: id
+            description: "USGS unique event identifier, primary key."
+            tests:
+              - unique
+              - not_null
+
+models:
+  - name: stg_earthquakes
+    description: "Cleaned, typed earthquake events — thin pass-through from staging.earthquakes with column renames only, no business logic."
+    columns:
+      - name: id
+        description: "USGS unique event identifier, primary key."
+        tests:
+          - unique
+          - not_null
+      - name: time
+        description: "UTC timestamp of the earthquake event."
+        tests:
+          - not_null
+      - name: latitude
+        tests:
+          - not_null
+      - name: longitude
+        tests:
+          - not_null
+      - name: mag
+        description: "Earthquake magnitude."
+        tests:
+          - not_null
+      - name: mag_category
+        description: "Magnitude bucket assigned by Spark's enrich() step."
+        tests:
+          - accepted_values:
+              arguments:
+                values: [minor, light, moderate, strong, major]
+      - name: depth_category
+        description: "Depth bucket assigned by Spark's enrich() step."
+        tests:
+          - accepted_values:
+              arguments:
+                values: [shallow, intermediate, deep]
+      - name: estimated_energy_joules
+        description: "Estimated radiated seismic energy via the Gutenberg-Richter relation."
+      - name: hour_of_day
+        description: "Hour (0-23) the event occurred, UTC."
+      - name: day_of_week
+        description: "Day of week the event occurred."
