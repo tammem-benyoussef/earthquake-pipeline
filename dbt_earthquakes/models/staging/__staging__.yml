@@ -41,12 +41,14 @@ models:
         description: "Magnitude bucket assigned by Spark's enrich() step."
         tests:
           - accepted_values:
-              values: [minor, light, moderate, strong, major]
+              arguments:
+                values: [minor, light, moderate, strong, major]
       - name: depth_category
         description: "Depth bucket assigned by Spark's enrich() step."
         tests:
           - accepted_values:
-              values: [shallow, intermediate, deep]
+              arguments:
+                values: [shallow, intermediate, deep]
       - name: estimated_energy_joules
         description: "Estimated radiated seismic energy via the Gutenberg-Richter relation."
       - name: hour_of_day
