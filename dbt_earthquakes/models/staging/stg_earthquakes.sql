@@ -17,3 +17,4 @@ select
     hour_of_day,
     day_of_week
 from {{ source('staging', 'earthquakes') }}
+where mag is not null

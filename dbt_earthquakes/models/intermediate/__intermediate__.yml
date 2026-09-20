@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: int_earthquakes
+    description: >
+      Earthquakes enriched with a coarse geographic region label, matched via
+      rectangular bounding-box lookup against seeds/region_lookup.csv. This is
+      a deliberate simplification (not true point-in-polygon seismic
+      regionalization like Flinn-Engdahl) — good enough for dashboard-level
+      regional breakdowns, not for seismological precision. Where an
+      earthquake falls inside multiple overlapping boxes, the smallest
+      (most specific) region wins.
+    columns:
+      - name: id
+        description: "USGS unique event identifier, primary key, one row per earthquake."
+        tests:
+          - unique
+          - not_null
+      - name: region_name
+        description: "Coarse region label from region_lookup.csv, or 'Other / Unclassified' if no box matched."
+        tests:
+          - not_null
