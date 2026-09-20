@@ -15,3 +15,15 @@ jobs:
         env:
           MINIO_ROOT_USER: dummy
           MINIO_ROOT_PASSWORD: dummy
+
+  dbt-checks:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: dbt_earthquakes
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build dbt image
+        run: docker build -t dbt-earthquakes .
+      - name: dbt parse
+        run: docker run dbt-earthquakes parse --no-partial-parse
