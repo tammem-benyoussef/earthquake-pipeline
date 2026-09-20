@@ -20,24 +20,28 @@ models:
         tests:
           - not_null
           - relationships:
-              to: ref('dim_date')
-              field: date_day
+              arguments:
+                  to: ref('dim_date')
+                  field: date_day
       - name: region_name
         tests:
           - not_null
           - relationships:
-              to: ref('region_lookup')
-              field: region_name
+              arguments:
+                  to: ref('region_lookup')
+                  field: region_name
       - name: latitude
         tests:
           - dbt_utils.accepted_range:
-              min_value: -90
-              max_value: 90
+              arguments:
+                min_value: -90
+                max_value: 90
       - name: longitude
         tests:
           - dbt_utils.accepted_range:
-              min_value: -180
-              max_value: 180
+              arguments:
+                min_value: -180
+                max_value: 180
 
   - name: mart_daily_summary
     description: "Pre-aggregated earthquake counts/magnitude/energy stats by date and region, for Power BI dashboard consumption without re-scanning raw events."

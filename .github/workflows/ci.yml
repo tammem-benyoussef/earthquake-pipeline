@@ -25,5 +25,22 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build dbt image
         run: docker build -t dbt-earthquakes .
+      - name: Create dummy profiles.yml for parsing
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << 'EOF'
+          earthquake_pipeline:
+            target: dev
+            outputs:
+              dev:
+                type: postgres
+                host: localhost
+                user: dummy
+                password: dummy
+                port: 5432
+                dbname: dummy
+                schema: staging
+                threads: 1
+          EOF
       - name: dbt parse
-        run: docker run dbt-earthquakes parse --no-partial-parse
+        run: docker run -v ~/.dbt:/root/.dbt dbt-earthquakes parse --no-partial-parse
