@@ -230,3 +230,5 @@ commands.md
 dbt_earthquakes/target/
 dbt_earthquakes/dbt_packages/
 dbt_earthquakes/logs/
+#airflow
+airflow/logs/
