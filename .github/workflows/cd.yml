@@ -2,7 +2,7 @@ name: CD
 
 on:
   push:
-    branches: [main, fead/cd]
+    branches: [main, feat/cd]
 
 permissions:
   contents: read
