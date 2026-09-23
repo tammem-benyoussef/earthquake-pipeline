@@ -44,3 +44,10 @@ jobs:
           EOF
       - name: dbt parse
         run: docker run -v ~/.dbt:/root/.dbt dbt-earthquakes parse --no-partial-parse
+  
+  airflow-dag-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install apache-airflow==2.10.5
+      - run: python -c "from airflow.models import DagBag; db = DagBag(dag_folder='airflow/dags', include_examples=False); assert not db.import_errors, db.import_errors"
