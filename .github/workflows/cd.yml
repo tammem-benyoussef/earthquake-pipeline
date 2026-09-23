@@ -2,7 +2,8 @@ name: CD
 
 on:
   push:
-    branches: [main, feat/cd]
+    branches: [main]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -42,7 +43,8 @@ jobs:
       - name: Build and push spark
         uses: docker/build-push-action@v6
         with:
-          context: ./spark
+          context: .
+          file: spark/Dockerfile
           push: true
           tags: |
             ghcr.io/${{ github.repository_owner }}/earthquake-spark:latest
@@ -63,20 +65,6 @@ jobs:
 
   generate-docs:
     runs-on: ubuntu-latest
-    services:
-      postgres:
-        image: postgres:16
-        env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: ci_pass
-          POSTGRES_DB: ci_db
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
     defaults:
       run:
         working-directory: dbt_earthquakes
@@ -92,10 +80,6 @@ jobs:
       - run: dbt deps
 
       - run: dbt seed --target ci
-        env:
-          DBT_PROFILES_DIR: ci
-
-      - run: dbt build --target ci
         env:
           DBT_PROFILES_DIR: ci
 
