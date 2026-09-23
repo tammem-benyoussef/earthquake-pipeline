@@ -1,0 +1,12 @@
+earthquake_pipeline:
+  target: ci
+  outputs:
+    ci:
+      type: postgres
+      host: localhost
+      user: postgres
+      password: ci_pass
+      port: 5432
+      dbname: ci_db
+      schema: staging
+      threads: 4
