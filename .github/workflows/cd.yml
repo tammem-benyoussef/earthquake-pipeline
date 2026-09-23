@@ -1,0 +1,118 @@
+name: CD
+
+on:
+  push:
+    branches: [main, feat/cd]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: vars
+        run: echo "sha_short=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build and push ingestion
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ingestion/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/earthquake-ingestion:latest
+            ghcr.io/${{ github.repository_owner }}/earthquake-ingestion:${{ steps.vars.outputs.sha_short }}
+          cache-from: type=gha,scope=ingestion
+          cache-to: type=gha,mode=max,scope=ingestion
+
+      - name: Build and push spark
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: spark/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/earthquake-spark:latest
+            ghcr.io/${{ github.repository_owner }}/earthquake-spark:${{ steps.vars.outputs.sha_short }}
+          cache-from: type=gha,scope=spark
+          cache-to: type=gha,mode=max,scope=spark
+
+      - name: Build and push dbt
+        uses: docker/build-push-action@v6
+        with:
+          context: ./dbt_earthquakes
+          push: true
+          tags: |
+            ghcr.io/${{ github.repository_owner }}/dbt-earthquakes:latest
+            ghcr.io/${{ github.repository_owner }}/dbt-earthquakes:${{ steps.vars.outputs.sha_short }}
+          cache-from: type=gha,scope=dbt
+          cache-to: type=gha,mode=max,scope=dbt
+
+  generate-docs:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci_pass
+          POSTGRES_DB: ci_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: dbt_earthquakes
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - run: pip install dbt-core==1.12.5 dbt-postgres==1.11.0
+
+      - run: dbt deps
+
+      - run: dbt seed --target ci
+        env:
+          DBT_PROFILES_DIR: ci
+
+      - run: dbt docs generate --target ci
+        env:
+          DBT_PROFILES_DIR: ci
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dbt_earthquakes/target
+
+  deploy-docs:
+    needs: generate-docs
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
