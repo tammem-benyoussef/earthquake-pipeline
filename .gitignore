@@ -226,9 +226,11 @@ terraform/*.tfstate
 terraform/*.tfstate.*
 
 commands.md
+
 # dbt
 dbt_earthquakes/target/
 dbt_earthquakes/dbt_packages/
 dbt_earthquakes/logs/
+
 #airflow
 airflow/logs/

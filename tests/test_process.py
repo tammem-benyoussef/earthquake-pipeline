@@ -1,4 +1,3 @@
-# tests/test_process.py
 import os
 os.environ.setdefault("MINIO_ROOT_USER", "dummy")
 os.environ.setdefault("MINIO_ROOT_PASSWORD", "dummy")
