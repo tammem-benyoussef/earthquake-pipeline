@@ -1,16 +1,32 @@
 region_id,region_name,min_lat,max_lat,min_long,max_long
 1,Pacific Northwest / Cascadia,40.0,52.0,-130.0,-116.0
 2,California,32.0,42.0,-125.0,-114.0
-3,Alaska,51.0,72.0,-170.0,-129.0
-4,Mexico / Central America,7.0,33.0,-118.0,-77.0
-5,Andes (South America),-56.0,12.0,-82.0,-60.0
-6,Caribbean,10.0,24.0,-88.0,-59.0
-7,Japan,24.0,46.0,122.0,146.0
-8,Indonesia / Philippines,-11.0,20.0,95.0,141.0
-9,New Zealand / Tonga,-48.0,-14.0,165.0,-173.0
-10,China / Central Asia,18.0,55.0,73.0,135.0
-11,Middle East / Iran,12.0,42.0,26.0,63.0
-12,Mediterranean / Southern Europe,30.0,47.0,-10.0,42.0
-13,Mid-Atlantic Ridge,-60.0,70.0,-40.0,-10.0
-14,East Africa Rift,-35.0,15.0,28.0,52.0
-15,Other / Unclassified,-90.0,90.0,-180.0,180.0
+3,Alaska / Aleutians,51.0,72.0,-180.0,-129.0
+4,Hawaii,18.0,23.0,-161.0,-154.0
+5,Mexico / Central America,7.0,33.0,-118.0,-77.0
+6,Andes (South America),-56.0,12.0,-82.0,-60.0
+7,Caribbean,10.0,24.0,-88.0,-59.0
+8,Japan,24.0,46.0,122.0,146.0
+9,Taiwan,21.0,26.0,119.0,123.0
+10,Philippines,4.0,21.0,116.0,127.0
+11,Indonesia,-11.0,6.0,95.0,141.0
+12,Papua New Guinea / Solomon Islands,-12.0,0.0,140.0,162.0
+13,New Zealand / Tonga / Fiji,-48.0,-14.0,165.0,-173.0
+14,China / Central Asia,18.0,55.0,73.0,122.0
+15,Himalaya / Nepal / NE India,26.0,36.0,73.0,97.0
+16,Myanmar / Southeast Asia,8.0,28.0,92.0,110.0
+17,Middle East / Iran,12.0,42.0,44.0,63.0
+18,Turkey / Greece / Aegean,34.0,42.0,19.0,44.0
+19,Mediterranean / Southern Europe,30.0,47.0,-10.0,19.0
+20,Iceland,62.0,67.0,-25.0,-13.0
+21,Mid-Atlantic Ridge,-60.0,70.0,-40.0,-10.0
+22,East Africa Rift,-35.0,15.0,28.0,52.0
+23,Red Sea / Gulf of Aden,10.0,30.0,32.0,52.0
+24,Kamchatka / Russian Far East,43.0,65.0,140.0,170.0
+25,Hindu Kush / Afghanistan / Pakistan,28.0,40.0,60.0,75.0
+26,Scotia Sea,-62.0,-54.0,-65.0,-25.0
+27,Antarctica,-90.0,-60.0,-180.0,180.0
+28,Central US / New Madrid,33.0,42.0,-95.0,-85.0
+29,Arctic,70.0,90.0,-180.0,180.0
+30,South Atlantic / Indian Ocean Ridges,-55.0,10.0,10.0,95.0
+31,Other / Unclassified,-90.0,90.0,-180.0,180.0
